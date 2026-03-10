@@ -1,12 +1,12 @@
 # Rotating Snake Pop Art Generator
 
-A Python tool that transforms a visual illusion image into a pop art composition — inspired by Andy Warhol's grid-based works. Each run produces a unique piece with fully randomized color palettes.
+A Python tool that transforms a visual illusion (Rotating Snakes Illusion created by Prof. Akiyoshi Kitaoka) image into a pop art composition (inspired by Andy Warhol's grid-based works). Each run produces a unique piece with fully randomized color palettes.
 
 ![Example output](./rspop.png)
 
 ## Background
 
-The input image (`RS.jpg`) is a variant of the **Rotating Snake illusion**, a motion illusion in which stationary patterns appear to rotate. The script takes this illusion as a base tile, generates color-remapped variants and their horizontal mirror images, then arranges them in a checkerboard grid — creating an artwork that is both visually striking and perceptually active.
+The input image (`RS.jpg`: created by Prof. Akiyoshi Kitaoka) is a variant of the **Rotating Snakes illusion**, a motion illusion in which stationary patterns appear to rotate. The script takes this illusion as a base tile, generates color-remapped variants and their horizontal mirror images, then arranges them in a checkerboard grid — creating an artwork that is both visually striking and perceptually active.
 
 Each cell in the grid uses an independently randomized color palette, so no two cells share the same colors. The alternating original / mirror layout reinforces the rhythmic visual tension of the illusion.
 
@@ -29,6 +29,8 @@ Place `RS.jpg` (or your own source image) in the same directory as the script, t
 
 ```bash
 python3 pop_art_illusion.py
+or
+python pop_art_illusion.py
 ```
 
 Output is saved to the current directory as `pop_art_YYYYMMDD_HHMMSS.png`. A new unique filename is generated on every run.
@@ -87,3 +89,5 @@ Pass that seed back with `--seed` to reproduce the exact same output.
 
 Eiji Watanabe   
 National Institute for Basic Biology, Japan
+
+## Enjoy !!!
