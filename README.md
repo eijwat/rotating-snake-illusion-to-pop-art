@@ -6,7 +6,7 @@ A Python tool that transforms a visual illusion (Rotating Snakes Illusion create
 
 ## Background
 
-The input image (`RS.jpg`: created by Prof. Akiyoshi Kitaoka) is a variant of the **Rotating Snakes illusion**, a motion illusion in which stationary patterns appear to rotate. The script takes this illusion as a base tile, generates color-remapped variants and their horizontal mirror images, then arranges them in a checkerboard grid — creating an artwork that is both visually striking and perceptually active.
+The input image (`RS.jpg`) is a variant of the **Rotating Snakes illusion** (created by Prof. Akiyoshi Kitaoka), a motion illusion in which stationary patterns appear to rotate. The script takes this illusion as a base tile, generates color-remapped variants and their horizontal mirror images, then arranges them in a checkerboard grid, creating an artwork that is both visually striking and perceptually active.
 
 Each cell in the grid uses an independently randomized color palette, so no two cells share the same colors. The alternating original / mirror layout reinforces the rhythmic visual tension of the illusion.
 
