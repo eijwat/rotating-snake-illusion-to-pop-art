@@ -1,4 +1,4 @@
-# Rotating Snake Pop Art Generator
+# "Rotating Snakes" Pop Art Generator
 
 A Python tool that transforms a visual illusion (Rotating Snakes Illusion created by Prof. Akiyoshi Kitaoka) image into a pop art composition (inspired by Andy Warhol's grid-based works). Each run produces a unique piece with fully randomized color palettes.
 
