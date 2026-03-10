@@ -92,4 +92,4 @@ National Institute for Basic Biology, Japan
 
 ## Enjoy !!!
 
-![Example output](./rspop2.png)
+![Example 7x3](./rspop2.png)
