@@ -192,6 +192,8 @@ palette modes:
     parser.add_argument('--palette', default='random',
                         choices=['random', 'warhol64', 'warhol67'],
                         help='Color palette mode (default: random)')
+    parser.add_argument('--anime', type=int, default=None, metavar='N',
+                        help='Generate N frames and save as an animated GIF (1 sec/frame)')
     return parser.parse_args()
 
 
@@ -276,6 +278,56 @@ def recolor_image(img_array, original_colors, new_palette):
     return new[nearest].reshape(h, w, 3).astype(np.uint8)
 
 
+def build_canvas(orig_array, original_colors, COLS, ROWS, CELL_SIZE, BORDER, BACKGROUND, PALETTE, palette_labels):
+    """Build one pop-art grid canvas and return it as a PIL Image."""
+    N_CELLS = COLS * ROWS
+    print(f"  Generating {N_CELLS} color variants ({palette_labels[PALETTE]})...")
+
+    n_rs  = sum(1 for r in range(ROWS) for c in range(COLS) if (r + c) % 2 == 0)
+    n_rsm = sum(1 for r in range(ROWS) for c in range(COLS) if (r + c) % 2 == 1)
+
+    rs_variants = []
+    for i in range(n_rs):
+        p = get_palette(PALETTE)
+        rs_variants.append(recolor_image(orig_array, original_colors, p))
+        label = p.get('_name', '')
+        if label:
+            print(f"    RS   {i+1}: {label}")
+        else:
+            print(f"    RS   {i+1}: white={p['white']}, c1={p['blue']}, c2={p['yellow']}")
+
+    rsm_variants = []
+    for i in range(n_rsm):
+        p = get_palette(PALETTE)
+        rsm_variants.append(np.fliplr(recolor_image(orig_array, original_colors, p)))
+        label = p.get('_name', '')
+        if label:
+            print(f"    RS-M {i+1}: {label}")
+        else:
+            print(f"    RS-M {i+1}: white={p['white']}, c1={p['blue']}, c2={p['yellow']}")
+
+    random.shuffle(rs_variants)
+    random.shuffle(rsm_variants)
+
+    rs_iter  = iter(rs_variants)
+    rsm_iter = iter(rsm_variants)
+    grid = [[None] * COLS for _ in range(ROWS)]
+    for r in range(ROWS):
+        for c in range(COLS):
+            grid[r][c] = next(rs_iter) if (r + c) % 2 == 0 else next(rsm_iter)
+
+    total_w = CELL_SIZE * COLS + BORDER * (COLS + 1)
+    total_h = CELL_SIZE * ROWS + BORDER * (ROWS + 1)
+    canvas  = np.full((total_h, total_w, 3), BACKGROUND, dtype=np.uint8)
+    for r in range(ROWS):
+        for c in range(COLS):
+            y0 = BORDER + r * (CELL_SIZE + BORDER)
+            x0 = BORDER + c * (CELL_SIZE + BORDER)
+            canvas[y0:y0+CELL_SIZE, x0:x0+CELL_SIZE] = grid[r][c]
+
+    return Image.fromarray(canvas)
+
+
 def main():
     args = parse_args()
 
@@ -316,61 +368,46 @@ def main():
     for k, v in original_colors.items():
         print(f"  {k}: {v}")
 
-    # Generate all cell variants with palettes from the chosen mode.
-    # Grid follows a checkerboard pattern: (row+col) even -> RS, odd -> RS-M (mirrored).
-    print(f"\nGenerating {N_CELLS} color variants ({palette_labels[PALETTE]})...")
+    # ---- Anime mode: generate N frames and save as GIF ----
+    if args.anime is not None:
+        n_frames = args.anime
+        if n_frames < 1:
+            raise ValueError("--anime requires a positive integer.")
+        gif_path = args.output if args.output else f'pop_art_{timestamp}.gif'
+        if not gif_path.lower().endswith('.gif'):
+            gif_path = os.path.splitext(gif_path)[0] + '.gif'
+        print(f"\nAnime mode: generating {n_frames} frames -> {gif_path}")
+        frames = []
+        for i in range(n_frames):
+            print(f"\n[Frame {i+1}/{n_frames}]")
+            frame = build_canvas(orig_array, original_colors,
+                                 COLS, ROWS, CELL_SIZE, BORDER, BACKGROUND,
+                                 PALETTE, palette_labels)
+            frames.append(frame)
+        out_dir = os.path.dirname(gif_path)
+        if out_dir:
+            os.makedirs(out_dir, exist_ok=True)
+        frames[0].save(
+            gif_path,
+            save_all=True,
+            append_images=frames[1:],
+            duration=1000,   # 1 second per frame
+            loop=0,          # loop forever
+        )
+        total_w, total_h = frames[0].size
+        print(f"\nDone! Animated GIF saved to: {gif_path}  ({total_w}x{total_h}px, {n_frames} frames)")
+        return
 
-    n_rs  = sum(1 for r in range(ROWS) for c in range(COLS) if (r + c) % 2 == 0)
-    n_rsm = sum(1 for r in range(ROWS) for c in range(COLS) if (r + c) % 2 == 1)
-
-    rs_variants = []
-    for i in range(n_rs):
-        p = get_palette(PALETTE)
-        rs_variants.append(recolor_image(orig_array, original_colors, p))
-        label = p.get('_name', '')
-        if label:
-            print(f"  RS   {i+1}: {label}  white={p['white']}, c1={p['blue']}, c2={p['yellow']}")
-        else:
-            print(f"  RS   {i+1}: white={p['white']}, c1={p['blue']}, c2={p['yellow']}")
-
-    rsm_variants = []
-    for i in range(n_rsm):
-        p = get_palette(PALETTE)
-        rsm_variants.append(np.fliplr(recolor_image(orig_array, original_colors, p)))
-        label = p.get('_name', '')
-        if label:
-            print(f"  RS-M {i+1}: {label}  white={p['white']}, c1={p['blue']}, c2={p['yellow']}")
-        else:
-            print(f"  RS-M {i+1}: white={p['white']}, c1={p['blue']}, c2={p['yellow']}")
-
-    # Shuffle placement order randomly
-    random.shuffle(rs_variants)
-    random.shuffle(rsm_variants)
-
+    # ---- Single image mode ----
     print("\nComposing grid...")
-    rs_iter  = iter(rs_variants)
-    rsm_iter = iter(rsm_variants)
-
-    grid = [[None] * COLS for _ in range(ROWS)]
-    for r in range(ROWS):
-        for c in range(COLS):
-            grid[r][c] = next(rs_iter) if (r + c) % 2 == 0 else next(rsm_iter)
-
-    # Assemble canvas
-    total_w = CELL_SIZE * COLS + BORDER * (COLS + 1)
-    total_h = CELL_SIZE * ROWS + BORDER * (ROWS + 1)
-    canvas  = np.full((total_h, total_w, 3), BACKGROUND, dtype=np.uint8)
-
-    for r in range(ROWS):
-        for c in range(COLS):
-            y0 = BORDER + r * (CELL_SIZE + BORDER)
-            x0 = BORDER + c * (CELL_SIZE + BORDER)
-            canvas[y0:y0+CELL_SIZE, x0:x0+CELL_SIZE] = grid[r][c]
-
+    img = build_canvas(orig_array, original_colors,
+                       COLS, ROWS, CELL_SIZE, BORDER, BACKGROUND,
+                       PALETTE, palette_labels)
     out_dir = os.path.dirname(output_path)
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
-    Image.fromarray(canvas).save(output_path, quality=95)
+    img.save(output_path, quality=95)
+    total_w, total_h = img.size
     print(f"\nDone! Saved to: {output_path}  ({total_w}x{total_h}px)")
 
 
