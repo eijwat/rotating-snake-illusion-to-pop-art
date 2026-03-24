@@ -2,7 +2,7 @@
 
 A Python tool that transforms a visual illusion ("Rotating Snakes" Illusion created by Prof. Akiyoshi Kitaoka) image into a pop art composition (inspired by Andy Warhol's grid-based works). Each run produces a unique piece with fully randomized color palettes.
 
-![Example output](./rspop.png)
+![Example marilyn](./marilyn.gif)
 
 ## Background
 
@@ -142,10 +142,13 @@ Pass that seed back with `--seed` to reproduce the exact same output.
 
 ## Author
 
-Eiji Watanabe   
+Eiji Watanabe
+
+Masaki Watabe
+
 National Institute for Basic Biology, Japan
 
 ## Enjoy !!!
 
-![Example marilyn](./marilyn.gif)
+![Example output](./rspop.png)
 ![Example Fraser Spiral](./fs.png)
