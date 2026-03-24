@@ -48,6 +48,8 @@ Output is saved to the current directory as `pop_art_YYYYMMDD_HHMMSS.png`. A new
 | `--bg` | `white` | Gap/background color: `white`, `black`, or `#RRGGBB` |
 | `--seed` | random | Random seed (omit for a new result every run) |
 | `--palette` | `random` | Color palette mode: `random`, `warhol64`, or `warhol67` |
+| `--anime` | — | Generate N frames and save as an animated GIF (1 sec/frame) |
+| `--seed` | random | Random seed (omit for a new result every run) |
 
 ## Palette Modes
 
@@ -112,6 +114,12 @@ python3 pop_art_illusion.py --palette warhol67 --cols 5 --rows 2
 
 # Warhol 1967 palette with black borders, reproducible
 python3 pop_art_illusion.py --palette warhol67 --border 10 --bg black --seed 42
+
+# Animated GIF — 10 frames, 1 second each
+python3 pop_art_illusion.py --anime 10
+
+# Animated GIF with Warhol palette, saved to a specific file
+python3 pop_art_illusion.py --anime 8 --palette warhol67 --output marilyn.gif
 ```
 
 ## How It Works
@@ -139,5 +147,5 @@ National Institute for Basic Biology, Japan
 
 ## Enjoy !!!
 
-![Example 7x3](./rspop2.png)
+![Example marilyn](./marilyn.gif)
 ![Example Fraser Spiral](./fs.png)
